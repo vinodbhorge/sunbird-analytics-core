@@ -34,6 +34,9 @@ object DataFetcher {
             case "s3" =>
                 JobLogger.log("Fetching the batch data from S3")
                 S3DataFetcher.getObjectKeys(search.queries.get);
+            case "aws" =>
+                JobLogger.log("Fetching the batch data from AWS S3")
+                S3DataFetcher.getObjectKeys(search.queries.get);
             case "azure" =>
                 JobLogger.log("Fetching the batch data from AZURE")
                 AzureDataFetcher.getObjectKeys(search.queries.get);

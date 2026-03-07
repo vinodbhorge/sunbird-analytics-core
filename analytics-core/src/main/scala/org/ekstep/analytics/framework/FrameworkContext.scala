@@ -59,18 +59,37 @@ class FrameworkContext {
         .region(storageRegion)
         .build()
       StorageServiceFactory.getStorageService(ociConfig)
-    } else if ("aws".equalsIgnoreCase(storageType) && !"".equalsIgnoreCase(storageEndpoint)) {
-      val awsConfig = SdkStorageConfig.builder(SdkStorageConfig.StorageType.AWS)
-        .authType(SdkStorageConfig.AuthType.IAM)
+    } else if ("aws".equalsIgnoreCase(storageType)) {
+      val awsConfigBuilder = SdkStorageConfig.builder(SdkStorageConfig.StorageType.AWS)
         .region(storageRegion)
-        .build()
-      StorageServiceFactory.getStorageService(awsConfig)
+      if (!"".equalsIgnoreCase(storageEndpoint)) awsConfigBuilder.endPoint(storageEndpoint)
+      val webIdentityTokenFile = System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+      val roleArn = System.getenv("AWS_ROLE_ARN")
+      val useOIDC = webIdentityTokenFile != null && roleArn != null && {
+        try {
+          val providerClass = Class.forName("software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider")
+          val provider = providerClass.getMethod("create").invoke(null)
+          provider.getClass.getMethod("resolveCredentials").invoke(provider)
+          true
+        } catch {
+          case ex: Exception =>
+            println(s"WARN: OIDC credential resolution failed (${ex.getMessage}), falling back to ACCESS_KEY auth")
+            false
+        }
+      }
+      if (useOIDC) {
+        awsConfigBuilder.authType(SdkStorageConfig.AuthType.IAM)
+      } else {
+        awsConfigBuilder.authType(SdkStorageConfig.AuthType.ACCESS_KEY)
+          .storageKey(AppConf.getConfig(storageKey))
+          .storageSecret(AppConf.getConfig(storageSecret))
+      }
+      StorageServiceFactory.getStorageService(awsConfigBuilder.build())
     } else {
       val sdkType = storageType.toLowerCase match {
         case "azure" => SdkStorageConfig.StorageType.AZURE
         case "gcloud" => SdkStorageConfig.StorageType.GCLOUD
         case "oci"   => SdkStorageConfig.StorageType.OCI
-        case "aws"   => SdkStorageConfig.StorageType.AWS
         case _       => SdkStorageConfig.StorageType.CEPHS3
       }
       val config = SdkStorageConfig.builder(sdkType)

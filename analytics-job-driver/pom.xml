@@ -115,7 +115,7 @@
             <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.3</version>
+				<version>3.2.4</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -125,6 +125,12 @@
 					</execution>
 				</executions>
 				<configuration>
+					<relocations>
+						<relocation>
+							<pattern>org.sunbird.cloud</pattern>
+							<shadedPattern>org.ekstep.shaded.sunbird.cloud</shadedPattern>
+						</relocation>
+					</relocations>
 					<transformers>
 						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 	              			<resource>META-INF/services/org.jclouds.apis.ApiMetadata</resource>
@@ -135,6 +141,7 @@
 							<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>reference.conf</resource>
 							</transformer>
+							<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
 	            		</transformers>
 					<filters>
 						<filter>
