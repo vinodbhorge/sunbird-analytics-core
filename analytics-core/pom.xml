@@ -229,6 +229,31 @@
 			<version>2.0.0</version>
         	<scope>runtime</scope>
 		</dependency>
+		<!-- AWS SDK v1 needed by hadoop-aws for s3a:// filesystem with OIDC/IRSA -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.400</version>
+			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-sts</artifactId>
+			<version>1.12.400</version>
+			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
     <!-- </dependency>
 		<dependency>
 			<groupId>${CLOUD_STORE_GROUP_ID}</groupId>

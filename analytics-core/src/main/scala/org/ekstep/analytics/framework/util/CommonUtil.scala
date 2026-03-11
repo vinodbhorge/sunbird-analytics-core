@@ -703,7 +703,7 @@ object CommonUtil {
   }
 
   def getS3File(bucket: String, file: String): String = {
-    "s3n://" + bucket + "/" + file;
+    "s3a://" + bucket + "/" + file;
   }
   
   def getS3FileWithoutPrefix(bucket: String, file: String): String = {
@@ -728,9 +728,15 @@ object CommonUtil {
 
   def setStorageConf(store: String, accountKey: Option[String], accountSecret: Option[String])(implicit sc: SparkContext): Configuration = {
     store.toLowerCase() match {
-      case "s3" =>
-        sc.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", AppConf.getConfig(accountKey.getOrElse("aws_storage_key")));
-        sc.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", AppConf.getConfig(accountSecret.getOrElse("aws_storage_secret")));
+      case "s3" | "aws" =>
+        val webIdentityTokenFile = System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+        val roleArn = System.getenv("AWS_ROLE_ARN")
+        if (webIdentityTokenFile != null && !webIdentityTokenFile.isEmpty && roleArn != null && !roleArn.isEmpty) {
+          sc.hadoopConfiguration.set("fs.s3a.aws.credentials.provider", "com.amazonaws.auth.WebIdentityTokenCredentialsProvider")
+        } else {
+          sc.hadoopConfiguration.set("fs.s3a.access.key", AppConf.getConfig(accountKey.getOrElse("aws_storage_key")))
+          sc.hadoopConfiguration.set("fs.s3a.secret.key", AppConf.getConfig(accountSecret.getOrElse("aws_storage_secret")))
+        }
       case "azure" =>
         sc.hadoopConfiguration.set("fs.azure", "org.apache.hadoop.fs.azure.NativeAzureFileSystem")
         sc.hadoopConfiguration.set("fs.azure.account.key." + AppConf.getConfig(accountKey.getOrElse("azure_storage_key")) + ".blob.core.windows.net", AppConf.getConfig(accountSecret.getOrElse("azure_storage_secret")))

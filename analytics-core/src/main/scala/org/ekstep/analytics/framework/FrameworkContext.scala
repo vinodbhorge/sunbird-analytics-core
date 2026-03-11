@@ -61,23 +61,18 @@ class FrameworkContext {
       StorageServiceFactory.getStorageService(ociConfig)
     } else if ("aws".equalsIgnoreCase(storageType)) {
       val awsConfigBuilder = SdkStorageConfig.builder(SdkStorageConfig.StorageType.AWS)
-        .region(storageRegion)
-      if (!"".equalsIgnoreCase(storageEndpoint)) awsConfigBuilder.endPoint(storageEndpoint)
       val webIdentityTokenFile = System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
       val roleArn = System.getenv("AWS_ROLE_ARN")
-      val useOIDC = webIdentityTokenFile != null && roleArn != null && {
-        try {
-          val providerClass = Class.forName("software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider")
-          val provider = providerClass.getMethod("create").invoke(null)
-          provider.getClass.getMethod("resolveCredentials").invoke(provider)
-          true
-        } catch {
-          case ex: Exception =>
-            println(s"WARN: OIDC credential resolution failed (${ex.getMessage}), falling back to ACCESS_KEY auth")
-            false
-        }
-      }
-      if (useOIDC) {
+      val useIAM = webIdentityTokenFile != null && !webIdentityTokenFile.isEmpty && roleArn != null && !roleArn.isEmpty
+      // Only set region if explicitly configured; otherwise let the SDK auto-detect from
+      // AWS_DEFAULT_REGION / AWS_REGION env vars (automatically set in EKS/OIDC pods)
+      if (storageRegion != null && !storageRegion.isEmpty) awsConfigBuilder.region(storageRegion)
+      // For IAM/OIDC, do NOT set a custom endpoint — the SDK must use the standard AWS regional
+      // endpoint for SigV4 signing to work correctly with temporary IRSA credentials.
+      // A custom endpoint (e.g. https://s3.us-east-1.amazonaws.com) forces customEndpoint=true
+      // in AwsStorageService, which causes signature mismatch with session-token-based auth.
+      if (!useIAM && storageEndpoint != null && !storageEndpoint.isEmpty) awsConfigBuilder.endPoint(storageEndpoint)
+      if (useIAM) {
         awsConfigBuilder.authType(SdkStorageConfig.AuthType.IAM)
       } else {
         awsConfigBuilder.authType(SdkStorageConfig.AuthType.ACCESS_KEY)
