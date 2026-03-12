@@ -732,7 +732,7 @@ object CommonUtil {
         val webIdentityTokenFile = System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
         val roleArn = System.getenv("AWS_ROLE_ARN")
         if (webIdentityTokenFile != null && !webIdentityTokenFile.isEmpty && roleArn != null && !roleArn.isEmpty) {
-          sc.hadoopConfiguration.set("fs.s3a.aws.credentials.provider", "com.amazonaws.auth.WebIdentityTokenCredentialsProvider")
+          sc.hadoopConfiguration.set("fs.s3a.aws.credentials.provider", "org.ekstep.analytics.hadoop.OidcCredentialsProvider")
         } else {
           sc.hadoopConfiguration.set("fs.s3a.access.key", AppConf.getConfig(accountKey.getOrElse("aws_storage_key")))
           sc.hadoopConfiguration.set("fs.s3a.secret.key", AppConf.getConfig(accountSecret.getOrElse("aws_storage_secret")))
