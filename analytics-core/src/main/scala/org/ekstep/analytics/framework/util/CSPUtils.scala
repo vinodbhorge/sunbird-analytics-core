@@ -24,7 +24,7 @@ object S3Provider extends ICloudStorageProvider {
     val webIdentityTokenFile = System.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
     val roleArn = System.getenv("AWS_ROLE_ARN")
     if (webIdentityTokenFile != null && webIdentityTokenFile.nonEmpty && roleArn != null && roleArn.nonEmpty) {
-      sc.hadoopConfiguration.set("fs.s3a.aws.credentials.provider", "org.ekstep.analytics.hadoop.OidcCredentialsProvider")
+      sc.hadoopConfiguration.set("fs.s3a.aws.credentials.provider", "com.amazonaws.auth.WebIdentityTokenCredentialsProvider")
     } else {
       val key = storageKey.filter(_.nonEmpty).map(value => AppConf.getConfig(value)).getOrElse(AppConf.getAwsKey())
       val secret = storageSecret.filter(_.nonEmpty).map(value => AppConf.getConfig(value)).getOrElse(AppConf.getAwsSecret())
