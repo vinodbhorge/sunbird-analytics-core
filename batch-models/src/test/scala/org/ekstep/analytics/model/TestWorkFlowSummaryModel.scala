@@ -46,7 +46,6 @@ class TestWorkFlowSummaryModel extends SparkFlatSpec with Matchers {
     }
 
     it should "generate 3 workflow summary" in {
-
         val data = loadFile[String]("src/test/resources/workflow-summary/test-data3.log")
         val out = WorkFlowSummaryModel.execute(data, None)
         out.count() should be(3)
