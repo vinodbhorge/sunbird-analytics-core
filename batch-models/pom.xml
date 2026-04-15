@@ -232,7 +232,7 @@
 		<dependency>
 			<groupId>org.scalamock</groupId>
 			<artifactId>scalamock_${scala.maj.version}</artifactId>
-			<version>5.2.0</version>
+			<version>7.5.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
