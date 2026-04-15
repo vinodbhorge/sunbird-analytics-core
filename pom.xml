@@ -63,7 +63,7 @@
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java</artifactId>
-				<version>3.25.5</version>
+				<version>4.34.1</version>
 			</dependency>
 			<!-- CVE-2023-52428 (HIGH), CVE-2025-53864 (MED) -->
 			<dependency>
