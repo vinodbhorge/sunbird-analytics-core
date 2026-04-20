@@ -374,7 +374,7 @@
 		<dependency>
 			<groupId>at.yawk.lz4</groupId>
 			<artifactId>lz4-java</artifactId>
-			<version>1.10.4</version>
+			<version>1.11.0</version>
 		</dependency>
 		<!-- CVE-2025-66566 (HIGH), CVE-2025-12183 (HIGH): force org.lz4 groupId to safe version.
 		     Kafka and Spark pull org.lz4:lz4-java transitively; the parent dependencyManagement
